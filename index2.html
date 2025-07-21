@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Focus & Break Timer</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin-top: 100px;
+      background: #f3f3f3;
+    }
+    h1 {
+      font-size: 48px;
+    }
+    #timer {
+      font-size: 64px;
+      margin: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      margin: 10px;
+    }
+    #status {
+      font-size: 24px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>⏱️ Focus & Break Timer</h1>
+  <div id="status">Ready to start</div>
+  <div id="timer">05:00</div>
+  <button onclick="startTimer()">▶ Start</button>
+  <button onclick="resetTimer()">🔄 Reset</button>
+
+  <!-- Alarma (puede ser reemplazada por otro sonido) -->
+  <audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg" preload="auto"></audio>
+
+  <script>
+    let focusTime = 5 * 60 * 1000;  // 5 minutos en ms
+    let breakTime = 1 * 60 * 1000;  // 2 minutos en ms
+    let isFocus = true;
+    let startTime;
+    let timerInterval;
+    let elapsed = 0;
+
+    const display = document.getElementById('timer');
+    const statusText = document.getElementById('status');
+    const alarmSound = document.getElementById('alarm');
+
+    function startTimer() {
+      startTime = Date.now();
+      const duration = isFocus ? focusTime : breakTime;
+      statusText.textContent = isFocus ? "🎯 Focus Time" : "☕ Break Time";
+
+      timerInterval = setInterval(() => {
+        elapsed = Date.now() - startTime;
+        const remaining = duration - elapsed;
+
+        if (remaining <= 0) {
+          clearInterval(timerInterval);
+          alarmSound.play();
+          isFocus = !isFocus; // Cambiar de fase
+          startTimer(); // Iniciar la próxima fase
+        } else {
+          display.textContent = formatTime(remaining);
+        }
+      }, 200);
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      isFocus = true;
+      display.textContent = formatTime(focusTime);
+      statusText.textContent = "Ready to start";
+    }
+
+    function formatTime(ms) {
+      const totalSeconds = Math.floor(ms / 1000);
+      const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+      const seconds = String(totalSeconds % 60).padStart(2, '0');
+      return `${minutes}:${seconds}`;
+    }
+
+    // Inicializamos el reloj
+    resetTimer();
+  </script>
+</body>
+</html>
